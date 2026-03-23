@@ -1,0 +1,69 @@
+local ObbyConfig = {}
+
+-- Round settings
+ObbyConfig.RoundDuration = 300       -- 5 minutes per round
+ObbyConfig.IntermissionDuration = 15  -- 15 seconds between rounds
+ObbyConfig.MinStages = 10
+ObbyConfig.MaxStages = 15
+ObbyConfig.StageHeight = 18          -- studs between each stage
+ObbyConfig.StageWidth = 30           -- stage platform size
+
+-- Rewards
+ObbyConfig.WinCoins = 100            -- coins for reaching the top
+ObbyConfig.FirstPlaceBonus = 200     -- extra for first player to top
+ObbyConfig.ParticipationCoins = 10   -- coins just for playing
+
+-- Stage types (weights determine how often they appear)
+ObbyConfig.StageTypes = {
+	{name = "KillBricks",       weight = 3, description = "Dodge the red bricks!"},
+	{name = "Spinners",         weight = 2, description = "Jump over the spinning beams!"},
+	{name = "NarrowBeams",      weight = 3, description = "Walk the thin path!"},
+	{name = "MovingPlatforms",  weight = 2, description = "Ride the moving platforms!"},
+	{name = "DisappearingTiles",weight = 2, description = "The floor vanishes!"},
+	{name = "LavaJumps",        weight = 3, description = "Jump across the lava!"},
+	{name = "Wallhop",          weight = 1, description = "Hop between the walls!"},
+	{name = "SpeedRun",         weight = 2, description = "Run before the walls close in!"},
+}
+
+-- Cosmetics (trails)
+ObbyConfig.Trails = {
+	{id = "fire",    name = "Fire Trail",    color = Color3.fromRGB(255, 100, 0),   price = 200},
+	{id = "ice",     name = "Ice Trail",     color = Color3.fromRGB(100, 200, 255), price = 200},
+	{id = "rainbow", name = "Rainbow Trail", color = Color3.fromRGB(255, 100, 255), price = 500},
+	{id = "neon",    name = "Neon Trail",    color = Color3.fromRGB(0, 255, 100),   price = 300},
+	{id = "galaxy",  name = "Galaxy Trail",  color = Color3.fromRGB(100, 50, 200),  price = 1000},
+	{id = "gold",    name = "Gold Trail",    color = Color3.fromRGB(255, 215, 0),   price = 0, vip = true},
+}
+
+-- Scheduled Events (UTC times)
+ObbyConfig.Events = {
+	{name = "Free 2x Coins",    dayOfWeek = 7, hour = 20, duration = 7200,  reward = "2x_coins"},
+	{name = "Double Rewards",   dayOfWeek = 4, hour = 0,  duration = 3600,  reward = "2x_rewards"},
+	{name = "Free Skip",        dayOfWeek = 1, hour = 17, duration = 1800,  reward = "free_skip"},
+	{name = "Mystery Gift",     dayOfWeek = 6, hour = 1,  duration = 900,   reward = "mystery"},
+}
+
+-- Game Passes
+ObbyConfig.GamePasses = {
+	DoubleCoins = {id = 0, name = "2x Coins",   price = 199},
+	VIPTrail =    {id = 0, name = "VIP Trail",   price = 99},
+	SpeedBoost =  {id = 0, name = "Speed Boost", price = 149, speedMultiplier = 1.3},
+	SkipStage =   {id = 0, name = "Skip Stage",  price = 49},
+}
+
+-- Dev Products
+ObbyConfig.Products = {
+	SkipOnce =  {id = 0, name = "Skip This Stage", price = 9},
+	ExtraLife = {id = 0, name = "Extra Life",       price = 19},
+	CoinPack =  {id = 0, name = "1000 Coins",      price = 49, coins = 1000},
+}
+
+-- Promo Codes
+ObbyConfig.Codes = {
+	TOWER   = 500,
+	OBBY    = 200,
+	CLIMB   = 1000,
+	TYCOON  = 500,   -- cross-promo
+}
+
+return ObbyConfig

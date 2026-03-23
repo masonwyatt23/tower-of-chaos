@@ -59,13 +59,13 @@ function StageGenerator.KillBricks(yBase, width, height, parent)
 		createPlatform(Vector3.new(4, 1, 4), Vector3.new(x, y, z), SAFE_COLOR, parent)
 	end
 
-	-- Kill bricks filling the gaps
-	for i = 1, 12 do
-		local x = math.random(-width/2 + 2, width/2 - 2)
-		local z = math.random(-width/2 + 2, width/2 - 2)
-		local y = yBase + math.random() * height
+	-- Kill bricks filling the gaps (fewer = fairer)
+	for i = 1, 7 do
+		local x = math.random(-width/3, width/3)
+		local z = math.random(-width/3, width/3)
+		local y = yBase + (i / 8) * height  -- distribute evenly in Y
 		createKillBrick(
-			Vector3.new(math.random(3, 8), 1, math.random(3, 8)),
+			Vector3.new(math.random(3, 5), 1, math.random(3, 5)),
 			Vector3.new(x, y, z),
 			parent
 		)
@@ -87,15 +87,15 @@ function StageGenerator.Spinners(yBase, width, height, parent)
 			parent
 		)
 
-		-- Spinning beam (kill brick that rotates)
+		-- Spinning beam (shorter so there's a gap to jump through)
 		local spinner = createKillBrick(
-			Vector3.new(width - 2, 3, 2),
+			Vector3.new(width * 0.5, 3, 2),
 			Vector3.new(0, y + 2, 0),
 			parent
 		)
 
-		-- Animate rotation
-		local speed = 1 + math.random() * 2
+		-- Animate rotation (consistent speed so players can learn timing)
+		local speed = 1.2
 		local offset = math.random() * math.pi * 2
 		RunService.Heartbeat:Connect(function()
 			if spinner and spinner.Parent then
@@ -117,9 +117,9 @@ function StageGenerator.NarrowBeams(yBase, width, height, parent)
 		local z = math.random(-width/3, width/3)
 		local endPos = Vector3.new(x, y, z)
 
-		-- Thin beam connecting platforms
+		-- Beam connecting platforms (4 studs wide = walkable)
 		local beam = createPlatform(
-			Vector3.new(2, 1, 8),
+			Vector3.new(4, 1, 8),
 			Vector3.new((prevEnd.X + endPos.X) / 2, y, (prevEnd.Z + endPos.Z) / 2),
 			Color3.fromRGB(150, 150, 150),
 			parent
@@ -145,11 +145,11 @@ function StageGenerator.MovingPlatforms(yBase, width, height, parent)
 			parent
 		)
 
-		-- Animate movement
-		local axis = math.random() > 0.5 and "X" or "Z"
-		local range = width / 3
-		local speed = 0.5 + math.random() * 1.5
-		local offset = math.random() * math.pi * 2
+		-- Animate movement (consistent speed, alternating direction per platform)
+		local axis = (i % 2 == 0) and "X" or "Z"
+		local range = width / 4
+		local speed = 0.8  -- consistent so players can learn
+		local offset = i * math.pi / 3  -- staggered but predictable
 
 		RunService.Heartbeat:Connect(function()
 			if platform and platform.Parent then
@@ -189,14 +189,14 @@ function StageGenerator.DisappearingTiles(yBase, width, height, parent)
 				if not character or not character:FindFirstChildOfClass("Humanoid") then return end
 				debounce = true
 
-				-- Flash red then disappear
+				-- Flash red then disappear (1.5s warning = fair)
 				tile.Color = KILL_COLOR
-				task.wait(0.8)
+				task.wait(1.5)
 				tile.Transparency = 1
 				tile.CanCollide = false
 
-				-- Reappear after 3 seconds
-				task.wait(3)
+				-- Reappear quickly (1.5s = keeps pace)
+				task.wait(1.5)
 				tile.Transparency = 0
 				tile.CanCollide = true
 				tile.Color = Color3.fromRGB(200, 200, 100)
@@ -247,7 +247,7 @@ end
 function StageGenerator.Wallhop(yBase, width, height, parent)
 	-- Two walls facing each other
 	local wallWidth = 1
-	local gap = 8
+	local gap = 5  -- 5 studs = doable jump (7 stud max jump)
 
 	local leftWall = createPlatform(
 		Vector3.new(wallWidth, height, width/2),
@@ -290,25 +290,26 @@ function StageGenerator.SpeedRun(yBase, width, height, parent)
 		parent
 	)
 
-	-- Kill walls that close in periodically
-	local numWalls = math.random(4, 7)
+	-- Kill walls that sweep across the corridor (duck or jump!)
+	local numWalls = math.random(3, 5)
 	for i = 1, numWalls do
 		local z = -corridorLength/2 + (i / (numWalls + 1)) * corridorLength
-		local wall = createKillBrick(
-			Vector3.new(10, 6, 1),
-			Vector3.new(0, y + 3, z),
-			parent
-		)
 
-		-- Animate: slide in from side then reset
-		local speed = 1 + math.random() * 2
-		local offset = math.random() * math.pi * 2
-		local startX = 15
+		-- Alternate: high walls (jump over) and low walls (walk under gap)
+		local isHigh = (i % 2 == 0)
+		local wallY = isHigh and (y + 5) or (y + 2)
+		local wallSize = isHigh and Vector3.new(12, 2, 1) or Vector3.new(12, 3, 1)
+
+		local wall = createKillBrick(wallSize, Vector3.new(0, wallY, z), parent)
+
+		-- Walls sweep left-to-right at consistent speed
+		local speed = 1.0
+		local startX = 10
 
 		RunService.Heartbeat:Connect(function()
 			if wall and wall.Parent then
-				local t = (math.sin(tick() * speed + offset) + 1) / 2
-				wall.CFrame = CFrame.new(startX * (1 - t), y + 3, z)
+				local t = (math.sin(tick() * speed + i) + 1) / 2
+				wall.CFrame = CFrame.new(startX * (t * 2 - 1), wallY, z)
 			end
 		end)
 	end

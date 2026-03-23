@@ -155,7 +155,7 @@ local function generateTower()
 	local winPlatform = Instance.new("Part")
 	winPlatform.Name = "WinPlatform"
 	winPlatform.Size = Vector3.new(ObbyConfig.StageWidth, 2, ObbyConfig.StageWidth)
-	winPlatform.Position = Vector3.new(0, (numStages + 1) * ObbyConfig.StageHeight, 0)
+	winPlatform.Position = Vector3.new(0, (numStages + 0.5) * ObbyConfig.StageHeight + 5, 0)
 	winPlatform.Anchored = true
 	winPlatform.Color = Color3.fromRGB(255, 215, 0)
 	winPlatform.Material = Enum.Material.Neon
@@ -279,6 +279,47 @@ function pickRandomStage()
 	return ObbyConfig.StageTypes[1].name
 end
 
+-- Respawn player at their last checkpoint (not bottom!)
+local function respawnAtCheckpoint(player)
+	local stage = playerStages[player] or 0
+	local character = player.Character
+	if not character then return end
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	if stage > 0 and currentTower then
+		local checkpoint = currentTower:FindFirstChild("Checkpoint_" .. stage)
+		if checkpoint then
+			hrp.CFrame = CFrame.new(checkpoint.Position + Vector3.new(0, 3, 0))
+			return
+		end
+	end
+	-- Fallback: spawn at base
+	hrp.CFrame = CFrame.new(0, 5, 0)
+end
+
+-- Hook death → respawn at checkpoint for each player
+local function setupDeathRespawn(player)
+	player.CharacterAdded:Connect(function(character)
+		local humanoid = character:WaitForChild("Humanoid")
+		humanoid.Died:Connect(function()
+			-- Track deaths
+			local data = PlayerData[player]
+			if data then
+				data.deaths = (data.deaths or 0) + 1
+			end
+			-- Respawn after brief delay
+			task.wait(1.5)
+			player:LoadCharacter()
+		end)
+		-- Teleport to checkpoint after respawn
+		task.wait(0.5)
+		if roundActive then
+			respawnAtCheckpoint(player)
+		end
+	end)
+end
+
 -- Teleport all players back to spawn
 local function resetPlayers()
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -339,8 +380,11 @@ task.spawn(function()
 		roundActive = false
 		for player, _ in pairs(PlayerData) do
 			if player.Parent and not winners[player] then
+				-- Scale participation coins by stage reached (not flat 10)
+				local stage = playerStages[player] or 0
+				local coins = math.max(ObbyConfig.ParticipationCoins, stage * 5)
 				if _G.AddCoins then
-					_G.AddCoins(player, ObbyConfig.ParticipationCoins)
+					_G.AddCoins(player, coins)
 				end
 			end
 			local data = PlayerData[player]
@@ -392,6 +436,11 @@ Players.PlayerRemoving:Connect(function(player)
 	task.delay(5, function()
 		PlayerData[player] = nil
 	end)
+end)
+
+-- Setup death respawn for each player
+Players.PlayerAdded:Connect(function(player)
+	setupDeathRespawn(player)
 end)
 
 -- Leaderboard

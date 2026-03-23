@@ -149,6 +149,71 @@ skipBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Bottom buttons: SHOP, CODES
+local shopBtn = Instance.new("TextButton")
+shopBtn.Size = UDim2.new(0, 100, 0, 40)
+shopBtn.Position = UDim2.new(0, 10, 1, -50)
+shopBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
+shopBtn.BorderSizePixel = 0
+shopBtn.Text = "SHOP"
+shopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+shopBtn.TextSize = 16
+shopBtn.Font = Enum.Font.GothamBold
+shopBtn.Parent = screenGui
+Instance.new("UICorner", shopBtn).CornerRadius = UDim.new(0, 8)
+
+shopBtn.MouseButton1Click:Connect(function()
+	if _G.ShowShopUI then _G.ShowShopUI() end
+end)
+
+local codesBtn = Instance.new("TextButton")
+codesBtn.Size = UDim2.new(0, 100, 0, 40)
+codesBtn.Position = UDim2.new(0, 120, 1, -50)
+codesBtn.BackgroundColor3 = Color3.fromRGB(150, 80, 200)
+codesBtn.BorderSizePixel = 0
+codesBtn.Text = "CODES"
+codesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+codesBtn.TextSize = 16
+codesBtn.Font = Enum.Font.GothamBold
+codesBtn.Parent = screenGui
+Instance.new("UICorner", codesBtn).CornerRadius = UDim.new(0, 8)
+
+codesBtn.MouseButton1Click:Connect(function()
+	if _G.ShowCodeUI then _G.ShowCodeUI() end
+end)
+
+-- Deaths counter (top right)
+local deathFrame = Instance.new("Frame")
+deathFrame.Size = UDim2.new(0, 120, 0, 35)
+deathFrame.Position = UDim2.new(1, -130, 0, 10)
+deathFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+deathFrame.BackgroundTransparency = 0.15
+deathFrame.BorderSizePixel = 0
+deathFrame.Parent = screenGui
+Instance.new("UICorner", deathFrame).CornerRadius = UDim.new(0, 8)
+
+local deathLabel = Instance.new("TextLabel")
+deathLabel.Name = "DeathLabel"
+deathLabel.Size = UDim2.new(1, -10, 1, 0)
+deathLabel.Position = UDim2.new(0, 10, 0, 0)
+deathLabel.BackgroundTransparency = 1
+deathLabel.Text = "Deaths: 0"
+deathLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+deathLabel.TextSize = 16
+deathLabel.Font = Enum.Font.GothamBold
+deathLabel.TextXAlignment = Enum.TextXAlignment.Left
+deathLabel.Parent = deathFrame
+
+-- Track deaths locally
+local deaths = 0
+player.CharacterAdded:Connect(function(character)
+	local humanoid = character:WaitForChild("Humanoid")
+	humanoid.Died:Connect(function()
+		deaths = deaths + 1
+		deathLabel.Text = "Deaths: " .. deaths
+	end)
+end)
+
 -- Event handlers
 RoundStart.OnClientEvent:Connect(function(numStages, duration)
 	totalStages = numStages

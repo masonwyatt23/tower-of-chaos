@@ -237,7 +237,7 @@ local function generateTower()
 	titleText.Size = UDim2.new(1, 0, 0.6, 0)
 	titleText.Position = UDim2.new(0, 0, 0.05, 0)
 	titleText.BackgroundTransparency = 1
-	titleText.Text = "TOWER OBBY"
+	titleText.Text = "TOWER OF CHAOS"
 	titleText.TextColor3 = Color3.fromRGB(255, 215, 0)
 	titleText.TextScaled = true
 	titleText.Font = Enum.Font.GothamBold

@@ -26,12 +26,15 @@ local StageReachedRemote = createRemote("StageReached")
 local UpdateCoinsRemote = createRemote("UpdateCoins")
 local SkipStageRemote = createRemote("SkipStage")
 
+local StageDescRemote = createRemote("StageDescription")
+
 -- Game state
 local currentTower = nil
 local roundActive = false
 local roundStartTime = 0
 local winners = {}
 local playerStages = {} -- [player] = current stage number
+local stageDescriptions = {} -- [stageNum] = description string
 
 -- Player data
 local PlayerData = {}
@@ -105,10 +108,19 @@ local function generateTower()
 
 	-- Generate random number of stages
 	local numStages = math.random(ObbyConfig.MinStages, ObbyConfig.MaxStages)
+	stageDescriptions = {}
 
 	for i = 1, numStages do
 		local yPos = i * ObbyConfig.StageHeight
 		local stageType = pickRandomStage()
+
+		-- Store stage description for client announcements
+		for _, st in ipairs(ObbyConfig.StageTypes) do
+			if st.name == stageType then
+				stageDescriptions[i] = st.description
+				break
+			end
+		end
 
 		-- Stage platform (checkpoint at bottom of each stage)
 		local checkpoint = Instance.new("Part")
@@ -144,6 +156,11 @@ local function generateTower()
 			if player and playerStages[player] and playerStages[player] < i then
 				playerStages[player] = i
 				StageReachedRemote:FireClient(player, i, numStages)
+				-- Send stage description announcement
+				local desc = stageDescriptions[i]
+				if desc then
+					StageDescRemote:FireClient(player, i, desc)
+				end
 			end
 		end)
 
@@ -357,17 +374,116 @@ task.spawn(function()
 	local baseplate = workspace:FindFirstChild("Baseplate")
 	if baseplate then baseplate:Destroy() end
 
+	-- Create lobby platform (persistent, players wait here between rounds)
+	local lobbyFolder = Instance.new("Folder")
+	lobbyFolder.Name = "Lobby"
+	lobbyFolder.Parent = workspace
+
+	local lobbyBase = Instance.new("Part")
+	lobbyBase.Name = "LobbyBase"
+	lobbyBase.Size = Vector3.new(80, 2, 80)
+	lobbyBase.Position = Vector3.new(0, -1, -80)
+	lobbyBase.Anchored = true
+	lobbyBase.Color = Color3.fromRGB(50, 50, 70)
+	lobbyBase.Material = Enum.Material.DiamondPlate
+	lobbyBase.Parent = lobbyFolder
+
+	local lobbySpawn = Instance.new("SpawnLocation")
+	lobbySpawn.Size = Vector3.new(10, 1, 10)
+	lobbySpawn.Position = Vector3.new(0, 1, -80)
+	lobbySpawn.Anchored = true
+	lobbySpawn.Color = Color3.fromRGB(50, 200, 50)
+	lobbySpawn.Neutral = true
+	lobbySpawn.Parent = lobbyFolder
+
+	-- Lobby title sign
+	local lobbySign = Instance.new("Part")
+	lobbySign.Size = Vector3.new(30, 10, 2)
+	lobbySign.Position = Vector3.new(0, 8, -115)
+	lobbySign.Anchored = true
+	lobbySign.Color = Color3.fromRGB(30, 30, 50)
+	lobbySign.Material = Enum.Material.SmoothPlastic
+	lobbySign.Parent = lobbyFolder
+
+	local signGui = Instance.new("SurfaceGui")
+	signGui.Face = Enum.NormalId.Front
+	signGui.Parent = lobbySign
+
+	local signTitle = Instance.new("TextLabel")
+	signTitle.Size = UDim2.new(1, 0, 0.6, 0)
+	signTitle.Position = UDim2.new(0, 0, 0.05, 0)
+	signTitle.BackgroundTransparency = 1
+	signTitle.Text = "TOWER OF CHAOS"
+	signTitle.TextColor3 = Color3.fromRGB(255, 100, 50)
+	signTitle.TextScaled = true
+	signTitle.Font = Enum.Font.GothamBold
+	signTitle.Parent = signGui
+
+	local signSub = Instance.new("TextLabel")
+	signSub.Size = UDim2.new(1, 0, 0.3, 0)
+	signSub.Position = UDim2.new(0, 0, 0.65, 0)
+	signSub.BackgroundTransparency = 1
+	signSub.Text = "Race to the Top!"
+	signSub.TextColor3 = Color3.fromRGB(200, 200, 200)
+	signSub.TextScaled = true
+	signSub.Font = Enum.Font.Gotham
+	signSub.Parent = signGui
+
+	-- Back face
+	local backGui = signGui:Clone()
+	backGui.Face = Enum.NormalId.Back
+	backGui.Parent = lobbySign
+
+	-- Lobby decorations: lamps
+	for _, pos in ipairs({
+		Vector3.new(-30, 0, -65), Vector3.new(30, 0, -65),
+		Vector3.new(-30, 0, -95), Vector3.new(30, 0, -95),
+	}) do
+		local pole = Instance.new("Part")
+		pole.Size = Vector3.new(1, 10, 1)
+		pole.Position = pos + Vector3.new(0, 5, 0)
+		pole.Anchored = true
+		pole.Color = Color3.fromRGB(60, 60, 60)
+		pole.Material = Enum.Material.Metal
+		pole.Parent = lobbyFolder
+
+		local bulb = Instance.new("Part")
+		bulb.Shape = Enum.PartType.Ball
+		bulb.Size = Vector3.new(2, 2, 2)
+		bulb.Position = pos + Vector3.new(0, 10.5, 0)
+		bulb.Anchored = true
+		bulb.Color = Color3.fromRGB(255, 150, 50)
+		bulb.Material = Enum.Material.Neon
+		bulb.Parent = lobbyFolder
+
+		local light = Instance.new("PointLight")
+		light.Color = Color3.fromRGB(255, 150, 50)
+		light.Brightness = 1
+		light.Range = 25
+		light.Parent = bulb
+	end
+
 	while true do
 		-- Generate new tower
 		roundActive = false
 		winners = {}
 		local numStages = generateTower()
 
-		-- Intermission
+		-- Intermission — teleport everyone to lobby
+		for _, player in ipairs(Players:GetPlayers()) do
+			local character = player.Character
+			if character then
+				local hrp = character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					hrp.CFrame = CFrame.new(0, 5, -80)
+				end
+			end
+		end
+
 		RoundEndRemote:FireAllClients(ObbyConfig.IntermissionDuration)
 		task.wait(ObbyConfig.IntermissionDuration)
 
-		-- Start round
+		-- Start round — teleport to tower base
 		roundActive = true
 		roundStartTime = tick()
 		resetPlayers()

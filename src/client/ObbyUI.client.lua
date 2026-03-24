@@ -214,20 +214,80 @@ player.CharacterAdded:Connect(function(character)
 	end)
 end)
 
+-- Stage announcement (center screen, fades out)
+local stageAnnounce = Instance.new("TextLabel")
+stageAnnounce.Name = "StageAnnounce"
+stageAnnounce.Size = UDim2.new(0.6, 0, 0, 50)
+stageAnnounce.Position = UDim2.new(0.2, 0, 0.4, 0)
+stageAnnounce.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+stageAnnounce.BackgroundTransparency = 0.3
+stageAnnounce.BorderSizePixel = 0
+stageAnnounce.Text = ""
+stageAnnounce.TextColor3 = Color3.fromRGB(255, 200, 50)
+stageAnnounce.TextSize = 24
+stageAnnounce.Font = Enum.Font.GothamBold
+stageAnnounce.Visible = false
+stageAnnounce.ZIndex = 10
+stageAnnounce.Parent = screenGui
+Instance.new("UICorner", stageAnnounce).CornerRadius = UDim.new(0, 10)
+
+-- Big splash text (GET READY / ROUND OVER)
+local splashText = Instance.new("TextLabel")
+splashText.Name = "Splash"
+splashText.Size = UDim2.new(1, 0, 0, 100)
+splashText.Position = UDim2.new(0, 0, 0.3, 0)
+splashText.BackgroundTransparency = 1
+splashText.Text = ""
+splashText.TextColor3 = Color3.fromRGB(255, 255, 255)
+splashText.TextSize = 60
+splashText.Font = Enum.Font.GothamBold
+splashText.TextStrokeTransparency = 0
+splashText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+splashText.Visible = false
+splashText.ZIndex = 20
+splashText.Parent = screenGui
+
+local function showSplash(text, color, duration)
+	splashText.Text = text
+	splashText.TextColor3 = color
+	splashText.Visible = true
+	task.delay(duration, function() splashText.Visible = false end)
+end
+
+local function showStageAnnouncement(stage, desc)
+	stageAnnounce.Text = "Stage " .. stage .. ": " .. desc
+	stageAnnounce.Visible = true
+	task.delay(2.5, function() stageAnnounce.Visible = false end)
+end
+
+-- Listen for stage descriptions
+task.spawn(function()
+	local StageDesc = Remotes:WaitForChild("StageDescription", 15)
+	if StageDesc then
+		StageDesc.OnClientEvent:Connect(function(stage, desc)
+			showStageAnnouncement(stage, desc)
+		end)
+	end
+end)
+
 -- Event handlers
 RoundStart.OnClientEvent:Connect(function(numStages, duration)
 	totalStages = numStages
 	currentStage = 0
 	roundTimeRemaining = duration
 	roundActive = true
+	deaths = 0
+	deathLabel.Text = "Deaths: 0"
 	stageLabel.Text = "Stage 0/" .. totalStages
 	timerLabel.Text = Utils.formatTime(duration)
+	showSplash("GO!", Color3.fromRGB(50, 255, 50), 2)
 end)
 
 RoundEnd.OnClientEvent:Connect(function(intermission)
 	roundActive = false
 	stageLabel.Text = "Round Over!"
 	timerLabel.Text = "Next round in " .. intermission .. "s"
+	showSplash("ROUND OVER", Color3.fromRGB(255, 100, 50), 3)
 end)
 
 StageReached.OnClientEvent:Connect(function(stage, total)

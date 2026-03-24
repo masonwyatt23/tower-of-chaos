@@ -73,6 +73,21 @@ ObbyConfig.Mutators = {
 	{id = "darkness",     name = "Lights Out",   description = "The lights go dark!"},
 }
 
+-- Achievements
+ObbyConfig.Achievements = {
+	{id = "first_win",       name = "First Victory",     trigger = "wins",           threshold = 1,    reward = 100},
+	{id = "5_wins",          name = "Skilled Climber",    trigger = "wins",           threshold = 5,    reward = 500},
+	{id = "25_wins",         name = "Tower Master",       trigger = "wins",           threshold = 25,   reward = 2500},
+	{id = "100_wins",        name = "Tower Legend",       trigger = "wins",           threshold = 100,  reward = 10000},
+	{id = "10_games",        name = "Regular Player",     trigger = "gamesPlayed",    threshold = 10,   reward = 200},
+	{id = "50_games",        name = "Dedicated",          trigger = "gamesPlayed",    threshold = 50,   reward = 1000},
+	{id = "1k_coins",        name = "Coin Collector",     trigger = "totalCoins",     threshold = 1000,  reward = 500},
+	{id = "10k_coins",       name = "Rich Climber",       trigger = "totalCoins",     threshold = 10000, reward = 2000},
+	{id = "50k_coins",       name = "Tower Tycoon",       trigger = "totalCoins",     threshold = 50000, reward = 10000},
+	{id = "10_votes",        name = "Democracy!",         trigger = "mutatorVotes",   threshold = 10,   reward = 300},
+	{id = "50_mutator_rounds", name = "Chaos Lover",      trigger = "roundsWithMutators", threshold = 50, reward = 2000},
+}
+
 -- Promo Codes
 ObbyConfig.Codes = {
 	TOWER    = 500,

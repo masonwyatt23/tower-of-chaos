@@ -25,6 +25,7 @@ local DEFAULT_DATA = {
 	redeemedCodes = {},
 	mutatorVotes = 0,
 	roundsWithMutators = 0,
+	achievements = {},
 }
 
 local function deepCopy(original)

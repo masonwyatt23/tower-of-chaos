@@ -2,7 +2,7 @@ local ObbyConfig = {}
 
 -- Round settings
 ObbyConfig.RoundDuration = 300       -- 5 minutes per round
-ObbyConfig.IntermissionDuration = 15  -- 15 seconds between rounds
+ObbyConfig.IntermissionDuration = 20  -- 20 seconds between rounds (includes mutator vote)
 ObbyConfig.MinStages = 10
 ObbyConfig.MaxStages = 15
 ObbyConfig.StageHeight = 18          -- studs between each stage
@@ -58,12 +58,31 @@ ObbyConfig.Products = {
 	CoinPack =  {id = 0, name = "1000 Coins",      price = 49, coins = 1000},
 }
 
+-- Mutator vote
+ObbyConfig.MutatorVoteDuration = 10  -- seconds for mutator vote
+
+-- Mutator definitions
+ObbyConfig.Mutators = {
+	{id = "low_gravity",  name = "Low Gravity",  description = "Gravity reduced! Float like a feather!"},
+	{id = "double_speed", name = "Speed Demon",  description = "Everyone moves at double speed!"},
+	{id = "giant",        name = "Giant Mode",   description = "Grow to 2x size!"},
+	{id = "tiny",         name = "Shrink Ray",   description = "Shrink down to half size!"},
+	{id = "fog",          name = "Fog of War",   description = "Thick fog rolls in!"},
+	{id = "ice",          name = "Ice Floor",    description = "Checkpoints are slippery!"},
+	{id = "bouncy",       name = "Bouncy",       description = "Extra jump power and lighter gravity!"},
+	{id = "darkness",     name = "Lights Out",   description = "The lights go dark!"},
+}
+
 -- Promo Codes
 ObbyConfig.Codes = {
-	TOWER   = 500,
-	OBBY    = 200,
-	CLIMB   = 1000,
-	TYCOON  = 500,   -- cross-promo
+	TOWER    = 500,
+	OBBY     = 200,
+	CLIMB    = 1000,
+	TYCOON   = 500,   -- cross-promo
+	CHAOS    = 500,   -- mutator wheel promo
+	CASHFLOW = 500,   -- Cross-promo: play CashFlow Empire
+	GALAXY   = 500,   -- Cross-promo: play Galaxy Empire
+	FOODIE   = 500,   -- Cross-promo: play Food Factory
 }
 
 return ObbyConfig

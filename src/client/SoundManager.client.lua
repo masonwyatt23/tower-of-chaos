@@ -23,10 +23,30 @@ local function createSound(name, assetId, volume)
 	Sounds[name] = sound
 end
 
-createSound("Checkpoint", 138677306, 0.4)
-createSound("Win",        138677306, 0.7)
-createSound("RoundStart", 138677306, 0.5)
-createSound("Death",      138677306, 0.3)
+-- Varied sound effects
+createSound("Checkpoint", 9125402735, 0.4)     -- Cha-ching checkpoint
+createSound("Win",        9125836726, 0.7)     -- Victory fanfare
+createSound("RoundStart", 9125786610, 0.5)     -- Whoosh start
+createSound("Death",      6895079853, 0.3)     -- Thud
+createSound("Vote",       6895079853, 0.2)     -- Click
+createSound("MutatorSpin",9125786610, 0.4)     -- Spinning wheel
+
+-- Background music (energetic action loop)
+local bgMusic = Instance.new("Sound")
+bgMusic.Name = "BackgroundMusic"
+bgMusic.SoundId = "rbxassetid://1837849285"
+bgMusic.Volume = 0.1
+bgMusic.Looped = true
+bgMusic.Parent = SoundService
+
+task.spawn(function()
+	task.wait(3)
+	bgMusic:Play()
+end)
+
+_G.SetMusicVolume = function(vol)
+	bgMusic.Volume = math.clamp(vol, 0, 1)
+end
 
 local function playSound(name)
 	local sound = Sounds[name]
@@ -37,6 +57,8 @@ local function playSound(name)
 		clone.Ended:Connect(function() clone:Destroy() end)
 	end
 end
+
+_G.PlaySound = playSound
 
 StageReached.OnClientEvent:Connect(function()
 	playSound("Checkpoint")

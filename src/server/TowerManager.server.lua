@@ -481,16 +481,33 @@ task.spawn(function()
 		end
 
 		RoundEndRemote:FireAllClients(ObbyConfig.IntermissionDuration)
+
+		-- Start mutator vote during intermission
+		if _G.StartMutatorVote then
+			_G.StartMutatorVote()
+		end
+
 		task.wait(ObbyConfig.IntermissionDuration)
 
 		-- Start round — teleport to tower base
 		roundActive = true
 		roundStartTime = tick()
 		resetPlayers()
+
+		-- Apply mutators after players are reset
+		if _G.ApplyMutators then
+			_G.ApplyMutators()
+		end
+
 		RoundStartRemote:FireAllClients(numStages, ObbyConfig.RoundDuration)
 
 		-- Wait for round to end
 		task.wait(ObbyConfig.RoundDuration)
+
+		-- Remove mutators before end-of-round processing
+		if _G.RemoveMutators then
+			_G.RemoveMutators()
+		end
 
 		-- End round — give participation coins
 		roundActive = false

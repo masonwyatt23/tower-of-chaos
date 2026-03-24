@@ -23,6 +23,8 @@ local DEFAULT_DATA = {
 	ownedTrails = {},
 	equippedTrail = "",
 	redeemedCodes = {},
+	mutatorVotes = 0,
+	roundsWithMutators = 0,
 }
 
 local function deepCopy(original)
